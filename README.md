@@ -1,4 +1,4 @@
-#Choropleth Map
+# Choropleth Map
 
 This code provides a template for generating choropleth maps to visualize census demographic data at the Census Tract geographic boundary.
 
