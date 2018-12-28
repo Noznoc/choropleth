@@ -2,6 +2,7 @@ var config = {
 	// configurations for map initial load
 	'mapTitle': 'Montreal Census 2016 Choropleth', // title of web page (seen in browser tab)
 	'mapDescription': 'This map shows some demographic variables in Montreal from the 2016 Census',
+	'mapInfo': 'Select the variable to see on the map and feel free to select the classification method and the number of classes. For more information on data classifications for choropleth maps, check out <a target="_blank" href="https://www.axismaps.com/guide/data/data-classification/">The Basics of Data Classification</a>.',
 	'mapInitialVar': ['Popultn','Population'], // initial variable to be visualized as a choropleth on window load, provide the variable name and the actual name
 	'mapBoundsSW': [-74.4900,45.0100], // set map south-west bounds
 	'mapBoundsNE': [-72.7756584,46.0500], // set map north-east bounds

@@ -1,10 +1,22 @@
 # Choropleth Map
 
-This code provides a template for generating choropleth maps to visualize census demographic data at the Census Tract geographic boundary.
+**This is currently in development, so detailed documentation will come later.**
 
-This is currently in development, so documentation will come.
+This code provides a template for generating choropleth maps to visualize Census data. You can modify the choropleth by adjusting the number of classes as well as by changing the classification method. The classification methods supported are: equal intervals, standard deviation, arithmetic progression, geometric progression, quantile, and jenks (natural breaks). These methods were already coded in javaScript by Simogeo, source can be accessed [here](https://github.com/simogeo/geostats).
 
-But basically you will have to make changes in `javascript/config.js` to update the map's initialization and labels. You will also have to update the data to your geojson of interest in `javascript/data.js`.
+# Data Prep
+
+**To be completed**
+
+# General Use
+
+In general, the map has been coded to allow a user to copy a geojson polygon into `javascript/data.js`, update labels and variable names in `javascript/config.js` and then explore how the data can be represented as a choropleth.
+
+That said, the code has been developed to easily be repurposed, read below to learn more.
+
+# Development / Repurpose
+
+**To be completed**
 
 ![Example of output](choropleth.gif)
 **Data from Statistics Canada 2016 Census Profile Table**
