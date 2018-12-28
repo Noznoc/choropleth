@@ -77,13 +77,32 @@ $(document).ready(function() {
     }
 
     function interpolateBins(binNumber, bins, colors) {
-    	var interpolation = [];
-
+    	var interpolation = []; //bins[bins.length-1],'#fff'
     	for (var i = 0; i <= binNumber; i++) {
 	    	interpolation.push(bins[i], colors[i]);
     	}
-
     	return interpolation;    
+	}
+
+	function buildClasses(selectedClass, choroplethStats, binNumber) {
+		try {
+	    	if (selectedClass == 'jenks'){
+	    		var bins = choroplethStats.getClassJenks(binNumber);
+	    	} else if (selectedClass == 'eqInterval') {
+	    		var bins = choroplethStats.getEqInterval(binNumber);
+	    	} else if (selectedClass == 'stdDeviation') {
+	    		var bins = choroplethStats.getStdDeviation(binNumber);
+	    	} else if (selectedClass == 'arithmeticProgression') {
+	    		var bins = choroplethStats.getArithmeticProgression(binNumber);
+	    	} else if (selectedClass == 'geometricProgression') {
+	    		var bins = choroplethStats.getGeometricProgression(binNumber);
+	    	} else {
+	    		var bins = choroplethStats.getQuantile(binNumber);
+	    	}
+	    	return bins;
+		} catch(err) {
+			$('.error').html(err + '<strong> Please select a different classification method or Census variable.</strong>');
+		}
 	}
 
 	function updateMap(button) {
@@ -94,38 +113,24 @@ $(document).ready(function() {
 
     	var variable =  $(button).attr('value'),
     		uid = $(button).attr('id'),
+    		selectedClass = $('.select-class').val(),
     		name = $(button).html(),
     		binNumber = parseInt($('.select-bin option:selected').text()),
-    		choroplethStats = new geostats(getValues(choroplethData[0], variable));
-
-    	try {
-	    	if ($('.select-class').val() == 'jenks'){
-	    		var bins = choroplethStats.getClassJenks(binNumber);
-	    	} else if ($('.select-class').val() == 'eqInterval') {
-	    		var bins = choroplethStats.getEqInterval(binNumber);
-	    	} else if ($('.select-class').val() == 'stdDeviation') {
-	    		var bins = choroplethStats.getStdDeviation(binNumber);
-	    	} else if ($('.select-class').val() == 'arithmeticProgression') {
-	    		var bins = choroplethStats.getArithmeticProgression(binNumber);
-	    	} else if ($('.select-class').val() == 'geometricProgression') {
-	    		var bins = choroplethStats.getGeometricProgression(binNumber);
-	    	} else {
-	    		var bins = choroplethStats.getQuantile(binNumber);
-	    	}
-		} catch(err) {
-			$('.error').html(err + '<strong> Please select a different classification method or Census variable.</strong>');
-		}
-
-    	var fill = ['interpolate', ['linear'], ['get', variable]].concat(interpolateBins(binNumber, bins, colors));
+    		choroplethStats = new geostats(getValues(choroplethData[0], variable)),
+    		bins = buildClasses(selectedClass,choroplethStats,binNumber),
+			fill = ['interpolate', ['linear'], ['get', variable]].concat(interpolateBins(binNumber, bins, colors));
+    	
     	map.setPaintProperty('choropleth', 'fill-color', fill);
     	$('#legend').html(buildLegend(bins,name.toUpperCase()));
 	}
 
 	// once map loads, run the following
 	map.on('load', function() {
-		var choroplethStats = new geostats(getValues(choroplethData[0], config.mapInitialVar[0]));
-		var bins = choroplethStats.getClassJenks(config.mapBins);
-		
+		var choroplethStats = new geostats(getValues(choroplethData[0], config.mapInitialVar[0])),
+			bins = buildClasses(config.mapClassMethod,choroplethStats,config.mapBins),
+			binsNull = [];
+		binsNull = bins.slice();
+		//binsNull.push(null);
 		// add map layer of census tracts
 	    map.addLayer({
 	        'id': 'choropleth',
@@ -140,12 +145,12 @@ $(document).ready(function() {
 	                'interpolate',
 	                ['linear'],
 	                ['get', config.mapInitialVar[0]]
-	            ].concat(interpolateBins(config.mapBins, bins, colors)),
+	            ].concat(interpolateBins(config.mapBins, binsNull, colors)),
 	            'fill-opacity': 0.7,
 	            'fill-outline-color': '#4B515D'
         	}
 	    }, 'place-town');
-
+	    console.log(bins)
 	    $('#legend').html(buildLegend(bins,config.mapInitialVar[1])); // update legend
 	    $('.button-layer').first().addClass('selected'); // change button color to indicate it is active on map
 
@@ -164,16 +169,12 @@ $(document).ready(function() {
 	    });
 
 	    map.on('click', 'choropleth', function(e) {
-	        // Change the cursor style as a UI indicator.
 	        map.getCanvas().style.cursor = 'pointer';
-
-	        var coordinates = e.features[0].geometry.coordinates.slice();
-	        var density = '<tr><td>Population Density (km&#178): </td><td>' + e.features[0].properties.PpltnDn + '</td></tr>';
-	        var age = '<tr><td>Median Age: </td><td>' + e.features[0].properties.MedinAg + '</td></tr>';
-	        var income = '<tr><td>Prevalence of low income based on the Low-income measure, after tax (LIM-AT) (%): </td><td>' + e.features[0].properties.LIM_AT + '</td></tr>';
-	        var population = '<tr><td>Population: </td><td>' + e.features[0].properties.Popultn + '</td></tr>';
-	        var description = '<table>' + density + age + income + population + '</table>';
-
+	        var rows = '';
+	        for (var i in config.mapVariablesNames) {
+	        	rows += '<tr><td>'+config.mapVariablesNames[i]+'</td><td>' + e.features[0].properties[config.mapVariables[i]] + '</td></tr>';
+	        }
+	        var description = '<table>' + rows + '</table>';
 	        popup.setLngLat(e.lngLat)
 	            .setHTML(description)
 	            .addTo(map);
