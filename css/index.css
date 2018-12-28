@@ -9,6 +9,11 @@ body {
 	padding:0;
 }
 
+.error {
+  color: red;
+  font-weight: 500;
+}
+
 #map { 
 	position:absolute; 
 	top:0; 
@@ -129,7 +134,7 @@ button:hover {
 }
 
 .button-hide {
-  margin-top: 20px !important;
+  margin: 20px 0px !important;
 }
 
 .hide {
@@ -145,7 +150,6 @@ button:hover {
 .selected {
   background-color: #88419d !important;
   color: white !important;
-}
 }
 
 .toggle {

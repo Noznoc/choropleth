@@ -33,11 +33,12 @@ $(document).ready(function() {
     		dropMenu = '<select class="select select-class browser-default custom-select"><option value="jenks">Jenks</option><option value="eqInterval">Equal Interval</option><option value="stdDeviation">Standard Deviation</option><option value="arithmeticProgression">Arithmetic Progression</option><option value="geometricProgression">Geometric Progression</option><option value="quantile">Quantile</option></select>',
     		bins = '<select class="select select-bin browser-default custom-select"><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option selected="selected">8</option><option>9</option><option>10</option><option>11</option></select>',
     		buttons = '',
-    		hide = '<button title="Hide/Show Census map layer" class="button-hide hide active">Hide Census Layer</button>';
+    		hide = '<button title="Hide/Show Census map layer" class="button-hide hide active">Hide Census Layer</button>',
+    		error = '<div class="error"></div>';
     	for (var i in config.mapVariablesNames) {
     		buttons += '<button class="button-layer" value="'+config.mapVariables[i]+'">'+config.mapVariablesNames[i]+'</button>'
     	}
-    	var html = title + description + '<div class="selects">' + dropMenu + bins + '</div>' + buttons + hide;
+    	var html = title + description + '<div class="selects">' + dropMenu + bins + '</div>' + buttons + hide + error;
     	return html;
     }
 
@@ -48,9 +49,9 @@ $(document).ready(function() {
     		var iter = parseInt(i);
     		if (iter !== bins.length-1) {
     			var past = iter+1;
-    			legend += '<div><span style="background-color:'+colors[i]+'"></span>'+bins[i]+' - '+(parseInt((bins[past]-0.1).toFixed(1))+0.99)+'</div>';
+    			legend += '<div><span style="background-color:'+colors[i]+'"></span>'+bins[i].toFixed(2)+' - '+bins[past].toFixed(2)+'</div>';
     		} else {
-    			legend += '<div><span style="background-color:'+colors[i]+'"></span>>='+bins[i]+'</div>';
+    			legend += '<div><span style="background-color:'+colors[i]+'"></span>>='+bins[i].toFixed(2)+'</div>';
     		}
     	}
     	legend += '<div><span style="background-color:#000"></span>Aucune donnée</div>';
@@ -81,8 +82,9 @@ $(document).ready(function() {
 
 	function updateMap(button) {
 		// adjust the button colors
-    	$('.button-layer').css('background-color', '#8c96c6').removeClass('selected');
-    	$(button).css('background-color','#88419d').addClass('selected');
+    	$('.button-layer').removeClass('selected');
+    	$(button).addClass('selected');
+    	$('.error').html('');
 
     	var variable =  $(button).attr('value'),
     		uid = $(button).attr('id'),
@@ -92,14 +94,19 @@ $(document).ready(function() {
 
     	if ($('.select-class').val() == 'jenks'){
     		var bins = choroplethStats.getClassJenks(binNumber);
-    	} else if ($('.select-class').val() == 'EqInterval') {
+    	} else if ($('.select-class').val() == 'eqInterval') {
     		var bins = choroplethStats.getEqInterval(binNumber);
-    	} else if ($('.select-class').val() == 'StdDeviation') {
+    	} else if ($('.select-class').val() == 'stdDeviation') {
     		var bins = choroplethStats.getStdDeviation(binNumber);
-    	} else if ($('.select-class').val() == 'ArithmeticProgression') {
+    	} else if ($('.select-class').val() == 'arithmeticProgression') {
     		var bins = choroplethStats.getArithmeticProgression(binNumber);
-    	}  else if ($('.select-class').val() == 'GeometricProgression') {
-    		var bins = choroplethStats.getGeometricProgression(binNumber);
+    	} else if ($('.select-class').val() == 'geometricProgression') {
+    		try {
+    			var bins = choroplethStats.getGeometricProgression(binNumber);
+			}
+			catch(err) {
+				$('.error').html(err + '<strong> Please select a different classification method or Census variable.</strong>');
+			}
     	} else {
     		var bins = choroplethStats.getQuantile(binNumber);
     	}
