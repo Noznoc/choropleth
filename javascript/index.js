@@ -26,11 +26,21 @@ $(document).ready(function() {
         closeOnClick: false
     });
 
+    function buildColors(bins,colors) {
+    	var colorsAdjust = [];
+    	if (bins.length >= 7) {
+    		colorsAdjust = colors.slice();
+    	} else  {
+    		colorsAdjust.push(colors[0],colors[2],colors[3],colors[5],colors[7],colors[9]);
+    	} 
+    	return colorsAdjust;
+    }
+
     function buildLayerMenu() {
     	var title = '<h2>'+config.mapTitle.toUpperCase()+'</h2>',
     		description = '<p>'+config.mapDescription+'<p>Select the variable to see on the map and feel free to select the classification method and the number of bins</p></p>',
     		dropMenu = '<select class="select select-class browser-default custom-select"><option value="jenks">Jenks</option><option value="eqInterval">Equal Interval</option><option value="stdDeviation">Standard Deviation</option><option value="arithmeticProgression">Arithmetic Progression</option><option value="geometricProgression">Geometric Progression</option><option value="quantile">Quantile</option></select>',
-    		bins = '<select class="select select-bin browser-default custom-select"><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option selected="selected">8</option><option>9</option><option>10</option><option>11</option></select>',
+    		bins = '<select class="select select-bin browser-default custom-select"><option>5</option><option>6</option><option>7</option><option selected="selected">8</option><option>9</option></select>',
     		buttons = '',
     		hide = '<button class="button-hide hide active">Hide Census Layer</button>',
     		error = '<div class="error"></div>';
@@ -44,6 +54,7 @@ $(document).ready(function() {
 	// function for building the legend
 	function buildLegend(bins, variable) {
     	var legend = '<div class="legend-title">'+variable.toUpperCase()+'</div>';
+    	var colorsAdj = buildColors(bins,colors);
     	for (var i in bins){
     		var iter = parseInt(i);
     		if (iter !== bins.length-1) {
@@ -55,9 +66,9 @@ $(document).ready(function() {
     			if (value.toString().indexOf('.0') >= 0) {
     				value = value.toString().split('.')[0];
     			}
-    			legend += '<div><span style="background-color:'+colors[i]+'"></span>'+value+' - '+(((bins[past].toFixed(1))-0.1)+0.09).toFixed(2)+'</div>';
+    			legend += '<div><span style="background-color:'+colorsAdj[i]+'"></span>'+value+' - '+(((bins[past].toFixed(1))-0.1)+0.09).toFixed(2)+'</div>';
     		} else {
-    			legend += '<div><span style="background-color:'+colors[i]+'"></span>>='+bins[i].toFixed(1)+'</div>';
+    			legend += '<div><span style="background-color:'+colorsAdj[i]+'"></span>>='+bins[i].toFixed(1)+'</div>';
     		}
     	}
     	legend += '<div><span style="background-color:#000"></span>No Data</div>';
@@ -69,35 +80,37 @@ $(document).ready(function() {
 		var values = [];
 	    Object.keys(data.features).forEach(function(key) {
 	    	if (data.features[key].properties[variable] !== null) {
-				var val = data.features[key].properties[variable]; //get the value of name
-				values.push(val); //push the name string in the array
+				var val = data.features[key].properties[variable]; // get the value of name
+				values.push(val); // push the name string in the array
 			}
 		});
 		return values;
     }
 
-    function interpolateBins(binNumber, bins, colors) {
+    function interpolateClasses(binNumber, bins, colors) {
     	var interpolation = []; //bins[bins.length-1],'#fff'
+    	var colorsAdj = buildColors(bins,colors);
     	for (var i = 0; i <= binNumber; i++) {
-	    	interpolation.push(bins[i], colors[i]);
+	    	interpolation.push(bins[i], colorsAdj[i]);
     	}
     	return interpolation;    
 	}
 
 	function buildClasses(selectedClass, choroplethStats, binNumber) {
+		var bins;
 		try {
 	    	if (selectedClass == 'jenks'){
-	    		var bins = choroplethStats.getClassJenks(binNumber);
+	    		bins = choroplethStats.getClassJenks(binNumber);
 	    	} else if (selectedClass == 'eqInterval') {
-	    		var bins = choroplethStats.getEqInterval(binNumber);
+	    		bins = choroplethStats.getEqInterval(binNumber);
 	    	} else if (selectedClass == 'stdDeviation') {
-	    		var bins = choroplethStats.getStdDeviation(binNumber);
+	    		bins = choroplethStats.getStdDeviation(binNumber);
 	    	} else if (selectedClass == 'arithmeticProgression') {
-	    		var bins = choroplethStats.getArithmeticProgression(binNumber);
+	    		bins = choroplethStats.getArithmeticProgression(binNumber);
 	    	} else if (selectedClass == 'geometricProgression') {
-	    		var bins = choroplethStats.getGeometricProgression(binNumber);
+	    		bins = choroplethStats.getGeometricProgression(binNumber);
 	    	} else {
-	    		var bins = choroplethStats.getQuantile(binNumber);
+	    		bins = choroplethStats.getQuantile(binNumber);
 	    	}
 	    	return bins;
 		} catch(err) {
@@ -118,7 +131,7 @@ $(document).ready(function() {
     		binNumber = parseInt($('.select-bin option:selected').text()),
     		choroplethStats = new geostats(getValues(choroplethData[0], variable)),
     		bins = buildClasses(selectedClass,choroplethStats,binNumber),
-			fill = ['interpolate', ['linear'], ['get', variable]].concat(interpolateBins(binNumber, bins, colors));
+			fill = ['interpolate', ['linear'], ['get', variable]].concat(interpolateClasses(binNumber, bins, colors));
     	
     	map.setPaintProperty('choropleth', 'fill-color', fill);
     	$('#legend').html(buildLegend(bins,name.toUpperCase()));
@@ -131,6 +144,7 @@ $(document).ready(function() {
 			binsNull = [];
 		binsNull = bins.slice();
 		//binsNull.push(null);
+		
 		// add map layer of census tracts
 	    map.addLayer({
 	        'id': 'choropleth',
@@ -145,12 +159,12 @@ $(document).ready(function() {
 	                'interpolate',
 	                ['linear'],
 	                ['get', config.mapInitialVar[0]]
-	            ].concat(interpolateBins(config.mapBins, binsNull, colors)),
+	            ].concat(interpolateClasses(config.mapBins, binsNull, colors)),
 	            'fill-opacity': 0.7,
 	            'fill-outline-color': '#4B515D'
         	}
 	    }, 'place-town');
-	    console.log(bins)
+
 	    $('#legend').html(buildLegend(bins,config.mapInitialVar[1])); // update legend
 	    $('.button-layer').first().addClass('selected'); // change button color to indicate it is active on map
 
@@ -168,7 +182,7 @@ $(document).ready(function() {
 	        }
 	    });
 
-	    map.on('click', 'choropleth', function(e) {
+	    map.on('mouseover', 'choropleth', function(e) {
 	        map.getCanvas().style.cursor = 'pointer';
 	        var rows = '';
 	        for (var i in config.mapVariablesNames) {
