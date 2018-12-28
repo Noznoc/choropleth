@@ -43,17 +43,24 @@ $(document).ready(function() {
 
 	// function for building the legend
 	function buildLegend(bins, variable) {
-    	var legend = '<div class="legend-title">'+variable+'</div>';
+    	var legend = '<div class="legend-title">'+variable.toUpperCase()+'</div>';
     	for (var i in bins){
     		var iter = parseInt(i);
     		if (iter !== bins.length-1) {
-    			var past = iter+1;
-    			legend += '<div><span style="background-color:'+colors[i]+'"></span>'+bins[i].toFixed(2)+' - '+bins[past].toFixed(2)+'</div>';
+    			var past = iter+1,
+    				value = bins[i].toFixed(1);
+    			if (value == 0.00) {
+    				value = 0;
+    			}
+    			if (value.toString().indexOf('.0') >= 0) {
+    				value = value.toString().split('.')[0];
+    			}
+    			legend += '<div><span style="background-color:'+colors[i]+'"></span>'+value+' - '+(((bins[past].toFixed(1))-0.1)+0.09).toFixed(2)+'</div>';
     		} else {
-    			legend += '<div><span style="background-color:'+colors[i]+'"></span>>='+bins[i].toFixed(2)+'</div>';
+    			legend += '<div><span style="background-color:'+colors[i]+'"></span>>='+bins[i].toFixed(1)+'</div>';
     		}
     	}
-    	legend += '<div><span style="background-color:#000"></span>Aucune donnée</div>';
+    	legend += '<div><span style="background-color:#000"></span>No Data</div>';
     	return legend;
     }
 

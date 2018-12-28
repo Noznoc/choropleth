@@ -124,6 +124,7 @@ button:hover {
 	font-weight: 700;
 	line-height: 13px;
 	padding: 10px 0px;
+  text-align: center;
 }
 
 .mapboxgl-popup-content {
