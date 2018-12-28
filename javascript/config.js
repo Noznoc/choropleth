@@ -20,5 +20,5 @@ var config = {
 	'mapBins': 8, // select the number of bins the data should be classified into, MIN is 2 and MAX is 11
 	'mapColors': ['#f7fcfd', '#e0ecf4', '#bfd3e6', '#9ebcda', '#8c96c6', '#8c6bb1', '#88419d', '#810f7c', '#4d004b', '#390037', '#2a0029', '#1c001c'], // colors for the choropleth map
 	'mapVariables': ['Popultn', 'MedinAg', 'LIM_AT', 'PpltnDn'], // what the data variables names are
-	'mapVariablesNames': ['Population','Median Age', 'Prevalence of low income based on the Low-income measure, after tax (LIM-AT) (%)', 'Population Density (km&#178)'] // what the variables' names should be on the map
+	'mapVariablesNames': ['Population','Median Age', 'Prevalence of Low Income based on the Low-Income Measure, After Tax (LIM-AT) (%)', 'Population Density (km&#178)'] // what the variables' names should be on the map
 }

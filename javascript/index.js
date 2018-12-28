@@ -2,12 +2,11 @@ $(document).ready(function() {
 
 	$('title').html(config.mapTitle);
 	$('#layers').html(buildLayerMenu());
+	$(function () {
+		$('[data-toggle="tooltip"]').tooltip();
+	})
 
-	var choroplethData = getChoroplethData(), // data for choropleth
-		choropleth;  // initialize variable for choropleth map layer
-
-	// variable for the slider, change here to update labels on slider
-	var sliderVar = config.sliderVar;
+	var choroplethData = getChoroplethData(); // data for choropleth
 
 	// colors for choropleth, change here to update colors on choropleth
 	var colors = config.mapColors;
@@ -33,10 +32,10 @@ $(document).ready(function() {
     		dropMenu = '<select class="select select-class browser-default custom-select"><option value="jenks">Jenks</option><option value="eqInterval">Equal Interval</option><option value="stdDeviation">Standard Deviation</option><option value="arithmeticProgression">Arithmetic Progression</option><option value="geometricProgression">Geometric Progression</option><option value="quantile">Quantile</option></select>',
     		bins = '<select class="select select-bin browser-default custom-select"><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option selected="selected">8</option><option>9</option><option>10</option><option>11</option></select>',
     		buttons = '',
-    		hide = '<button title="Hide/Show Census map layer" class="button-hide hide active">Hide Census Layer</button>',
+    		hide = '<button class="button-hide hide active">Hide Census Layer</button>',
     		error = '<div class="error"></div>';
     	for (var i in config.mapVariablesNames) {
-    		buttons += '<button class="button-layer" value="'+config.mapVariables[i]+'">'+config.mapVariablesNames[i]+'</button>'
+    		buttons += '<button class="button-layer" data-toggle="tooltip" data-placement="left" title="View '+config.mapVariablesNames[i]+' on the map" value="'+config.mapVariables[i]+'">'+config.mapVariablesNames[i]+'</button>'
     	}
     	var html = title + description + '<div class="selects">' + dropMenu + bins + '</div>' + buttons + hide + error;
     	return html;
@@ -92,24 +91,23 @@ $(document).ready(function() {
     		binNumber = parseInt($('.select-bin option:selected').text()),
     		choroplethStats = new geostats(getValues(choroplethData[0], variable));
 
-    	if ($('.select-class').val() == 'jenks'){
-    		var bins = choroplethStats.getClassJenks(binNumber);
-    	} else if ($('.select-class').val() == 'eqInterval') {
-    		var bins = choroplethStats.getEqInterval(binNumber);
-    	} else if ($('.select-class').val() == 'stdDeviation') {
-    		var bins = choroplethStats.getStdDeviation(binNumber);
-    	} else if ($('.select-class').val() == 'arithmeticProgression') {
-    		var bins = choroplethStats.getArithmeticProgression(binNumber);
-    	} else if ($('.select-class').val() == 'geometricProgression') {
-    		try {
-    			var bins = choroplethStats.getGeometricProgression(binNumber);
-			}
-			catch(err) {
-				$('.error').html(err + '<strong> Please select a different classification method or Census variable.</strong>');
-			}
-    	} else {
-    		var bins = choroplethStats.getQuantile(binNumber);
-    	}
+    	try {
+	    	if ($('.select-class').val() == 'jenks'){
+	    		var bins = choroplethStats.getClassJenks(binNumber);
+	    	} else if ($('.select-class').val() == 'eqInterval') {
+	    		var bins = choroplethStats.getEqInterval(binNumber);
+	    	} else if ($('.select-class').val() == 'stdDeviation') {
+	    		var bins = choroplethStats.getStdDeviation(binNumber);
+	    	} else if ($('.select-class').val() == 'arithmeticProgression') {
+	    		var bins = choroplethStats.getArithmeticProgression(binNumber);
+	    	} else if ($('.select-class').val() == 'geometricProgression') {
+	    		var bins = choroplethStats.getGeometricProgression(binNumber);
+	    	} else {
+	    		var bins = choroplethStats.getQuantile(binNumber);
+	    	}
+		} catch(err) {
+			$('.error').html(err + '<strong> Please select a different classification method or Census variable.</strong>');
+		}
 
     	var fill = ['interpolate', ['linear'], ['get', variable]].concat(interpolateBins(binNumber, bins, colors));
     	map.setPaintProperty('choropleth', 'fill-color', fill);
@@ -120,6 +118,7 @@ $(document).ready(function() {
 	map.on('load', function() {
 		var choroplethStats = new geostats(getValues(choroplethData[0], config.mapInitialVar[0]));
 		var bins = choroplethStats.getClassJenks(config.mapBins);
+		
 		// add map layer of census tracts
 	    map.addLayer({
 	        'id': 'choropleth',
@@ -136,9 +135,9 @@ $(document).ready(function() {
 	                ['get', config.mapInitialVar[0]]
 	            ].concat(interpolateBins(config.mapBins, bins, colors)),
 	            'fill-opacity': 0.7,
-	            'fill-outline-color': '#eee'
+	            'fill-outline-color': '#4B515D'
         	}
-	    }, choropleth);
+	    }, 'place-town');
 
 	    $('#legend').html(buildLegend(bins,config.mapInitialVar[1])); // update legend
 	    $('.button-layer').first().addClass('selected'); // change button color to indicate it is active on map
@@ -149,9 +148,9 @@ $(document).ready(function() {
 	        if (visibility === 'visible') {
 	            map.setLayoutProperty(layer, 'visibility', 'none');
 	            $(this).html('Show Census Layer');
-	            this.className = 'hide';
+	            $(this).addClass('hide').removeClass('active');
 	        } else {
-	            this.className = 'active';
+	            $(this).addClass('active').removeClass('hide');
 	            map.setLayoutProperty(layer, 'visibility', 'visible');
 	            $(this).html('Hide Census Layer');
 	        }

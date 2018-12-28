@@ -59,17 +59,21 @@ body {
 
 #layers button {
 	width: 100%;
-	border: 0px;
 	border-radius: 15px;
-	background-color: #8c96c6;
 	box-shadow: 0 1px 2px rgba(0,0,0,0.10);
 	padding: 5px;
 	margin: 2px;
-	color: white;
+}
+
+.button-layer {
+  background-color: #8c96c6;
+  color: white;
+  border: 0px;
 }
 
 .button-layer:hover {
 	background-color: #88419d !important;
+  color: white;
 }
 
 #layers p {
@@ -133,18 +137,47 @@ button:hover {
 	font-weight: 700;
 }
 
+.tooltip > .tooltip-inner {
+  background-color: #88419d; /*rgba(250,250,250,0.8);*/
+  color: white;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 12px;
+  border-radius: 10px;
+  padding: 10px 10px;
+  max-width: 240px;
+}
+
+.bs-tooltip-left .arrow::before {
+  border-left-color: #88419d !important;
+}
+
 .button-hide {
   margin: 20px 0px !important;
 }
 
 .hide {
-	background-color: #4CAF50 !important;
+	background-color: #4CAF50;
+  border: 1px solid white;
+  color: white;
+}
+
+.hide:hover {
+  background-color: white;
+  border: 1px solid #88419d;
+  color: #88419d;
 }
 
 .active {
-	background-color: #fff !important;
-	border: 1px solid #88419d !important;
-	color: #88419d !important;
+	background-color: white;
+	border: 1px solid #88419d;
+	color: #88419d;
+}
+
+.active:hover {
+  background-color: #4CAF50;
+  border: 1px solid white;
+  color: white;
 }
 
 .selected {
